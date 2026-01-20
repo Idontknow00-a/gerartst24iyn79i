@@ -92,8 +92,14 @@
             background: #fbcfe8;
         }
         
-        .data-field {
+        .data-row {
+            display: flex;
+            gap: 8px;
             margin-bottom: 8px;
+        }
+
+        .data-field {
+            flex: 1;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
@@ -101,6 +107,10 @@
             cursor: pointer;
             transition: all 0.2s;
             background: #f8fafc;
+        }
+
+        .data-field.full-width {
+            margin-bottom: 8px;
         }
 
         .data-field:hover {
@@ -390,24 +400,52 @@
                 <button class="action-btn generate" onclick="generateData()">GERAR</button>  
             </div>
             
-            <div class="data-field" onclick="copyDataField('fullName')">
-                <input type="text" class="data-input" id="fullName" readonly placeholder="Nome Completo">
+            <div class="data-row">
+                <div class="data-field" onclick="copyDataField('email')">
+                    <input type="text" class="data-input" id="email" readonly placeholder="Email">
+                </div>
+                
+                <div class="data-field" onclick="copyDataField('fullName')">
+                    <input type="text" class="data-input" id="fullName" readonly placeholder="Nome Completo">
+                </div>
             </div>
             
-            <div class="data-field" onclick="copyDataField('email')">
-                <input type="text" class="data-input" id="email" readonly placeholder="Email">
+            <div class="data-row">
+                <div class="data-field" onclick="copyDataField('cpf')">
+                    <input type="text" class="data-input" id="cpf" readonly placeholder="CPF">
+                </div>
+                
+                <div class="data-field" onclick="copyDataField('birthdate')">
+                    <input type="text" class="data-input" id="birthdate" readonly placeholder="Data Nascimento">
+                </div>
             </div>
-            
-            <div class="data-field" onclick="copyDataField('cpf')">
-                <input type="text" class="data-input" id="cpf" readonly placeholder="CPF">
+
+            <div class="data-row">
+                <div class="data-field" onclick="copyDataField('street')">
+                    <input type="text" class="data-input" id="street" readonly placeholder="Rua">
+                </div>
+
+                <div class="data-field" onclick="copyDataField('neighborhood')">
+                    <input type="text" class="data-input" id="neighborhood" readonly placeholder="Bairro">
+                </div>
             </div>
-            
-            <div class="data-field" onclick="copyDataField('birthdate')">
-                <input type="text" class="data-input" id="birthdate" readonly placeholder="Data Nascimento">
+
+            <div class="data-row">
+                <div class="data-field" onclick="copyDataField('city')">
+                    <input type="text" class="data-input" id="city" readonly placeholder="Cidade">
+                </div>
+
+                <div class="data-field" onclick="copyDataField('state')">
+                    <input type="text" class="data-input" id="state" readonly placeholder="Estado">
+                </div>
+
+                <div class="data-field" onclick="copyDataField('cep')">
+                    <input type="text" class="data-input" id="cep" readonly placeholder="CEP">
+                </div>
             </div>
 
             <!-- Notes Field -->
-            <div class="data-field" style="cursor: text;">
+            <div class="data-field full-width" style="cursor: text;">
                 <input type="text" class="data-input" id="notes" placeholder="Notas..." style="cursor: text;">
             </div>
 
@@ -521,12 +559,103 @@
             "Lopes", "Machado", "Mendes", "Melo", "Moraes", "Moreira", "Neto", "Oliveira", "Pereira", "Pinto",
             "Reis", "Ribeiro", "Rodrigues", "Silva", "Silveira", "Siqueira", "Souza", "Teixeira", "Torres", "Valente"];
         
+        // Dados para gerar endereços
+        const tiposVia = ["rua", "avenida", "travessa", "alameda", "praça", "rodovia", "estrada", "viela", "largo", "beco", "R.", "Av.", "Tv.", "Al.", "Estr.", "Rod.",
+  "Pç.", "Via", "Lg.", "Serv.", "Pass.",
+  "Marg.", "Cont.", "Proj."];
+        const titulos = ["doutor", "professor", "dom", "frei", "padre", "coronel", "major", "general", "senador", "deputado", "desembargador", "ministro", "São", "Santa", "Santo",
+  "Dom", "Dona",
+  "Dr.", "Dra.",
+  "Prof.", "Profa.",
+  "Pres.", "Gov.",
+  "Cap.", "Mal.", "Cel.", "Ten.",
+  "Eng.", "Arq.",
+  "Dep.", "Sen.", "Pe."];
+        const nomesRua = ["joão", "maria", "josé", "antonio", "pedro", "paulo", "carlos", "francisco", "ana", "luiz", "marcos", "rafael", "gabriel", "miguel", "lucas", "mateus", "felipe", "rodrigo", "bruno", "diego", "José", "João", "Antônio", "Pedro", "Paulo",
+  "Francisco", "Carlos", "Lucas", "Marcos",
+  "Miguel", "Rafael", "Daniel", "Bruno",
+  "Eduardo", "Felipe", "André", "Ricardo",
+  "Thiago", "Vinícius", "Matheus", "Leandro",
+  "Rodrigo", "Alexandre", "Marcelo", "Fábio",
+  "Henrique", "Diego", "Caio", "Renato",
+  "Gustavo", "Vitor", "Igor", "Samuel",
+  "Márcio", "Sérgio", "Otávio", "Roberto",
+  "Fernando", "Cristiano", "Jorge", "Maurício", "Maria", "Ana", "Rita", "Helena", "Beatriz",
+  "Laura", "Camila", "Juliana", "Patrícia",
+  "Fernanda", "Letícia", "Carolina", "Amanda",
+  "Natália", "Renata", "Daniela", "Vanessa",
+  "Gabriela", "Bianca", "Aline", "Larissa",
+  "Mariana", "Priscila", "Cláudia", "Mônica",
+  "Cristina", "Sílvia", "Denise", "Eliane",
+  "Sandra", "Luciana", "Regina", "Tatiane"];
+        const sobrenomesRua = ["silva", "santos", "oliveira", "souza", "rodrigues", "ferreira", "alves", "pereira", "lima", "gomes", "costa", "ribeiro", "martins", "carvalho", "rocha", "almeida", "soares", "nascimento", "araujo", "fernandes", "Silva", "Santos", "Oliveira", "Pereira",
+  "Costa", "Rodrigues", "Almeida", "Nogueira",
+  "Barbosa", "Teixeira", "Ribeiro", "Rocha",
+  "Martins", "Araújo", "Melo", "Freitas",
+  "Gomes", "Lima", "Carvalho", "Ferreira",
+  "Azevedo", "Farias", "Moura", "Batista",
+  "Pacheco", "Guimarães", "Lopes", "Vieira",
+  "Rangel", "Moreira", "Cavalcante", "Siqueira",
+  "Fonseca", "Paiva", "Assis", "Peixoto",
+  "Neves", "Torres", "Dantas", "Tavares",
+  "Amaral", "Cunha", "Barros", "Lacerda",
+  "Andrade", "Borges", "Figueiredo", "Macedo",
+  "Queiroz", "Rezende", "Seabra", "Valente",
+  "Braga", "Campos", "Coelho", "Correia",
+  "Drumond", "Esteves", "Franco", "Garcia",
+  "Lemos", "Menezes", "Moraes", "Nunes",
+  "Pinto", "Prado", "Ramos", "Rangel",
+  "Salazar", "Sampaio", "Serra", "Soares",
+  "Toledo", "Vasconcelos", "Xavier", "Falcão",
+  "Beltrão", "Bittencourt", "Brandão", "Caldeira",
+  "Chaves", "Cordeiro", "Guedes", "Junqueira",
+  "Lins", "Magalhães", "Pimentel", "Pontes",
+  "Saldanha", "Sarmento", "Trindade", "Veras"];
+        const tipoBairro = ["jardim", "vila", "parque", "centro", "bairro", "conjunto", "residencial", "cidade", "Jardim", "Vila", "Parque", "Residencial",
+  "Conjunto", "Setor", "Loteamento",
+  "Distrito", "Colônia", "Núcleo",
+  "Área", "Gleba", "Zona", "Recanto",
+  "Morada", "Bairro"];
+        const nomeBairro = ["esperança", "progresso", "união", "primavera", "nova", "santa", "são", "bela", "boa", "alto", "campo", "monte", "rio", "estrela", "aurora", "tropical", "paraíso", "liberdade", "flores", "palmeiras", "Primavera", "Esperança", "Boa Vista",
+  "Planalto", "São José", "São Pedro",
+  "Alvorada", "Liberdade", "Nova Vida",
+  "Santa Luzia", "Bela Vista",
+  "Monte Alegre", "Novo Horizonte",
+  "Sol Nascente", "Vale Verde",
+  "Paraíso", "Morada do Sol",
+  "Jardins", "Flor do Campo",
+  "Vila Rica", "Recanto Feliz",
+  "Campo Verde", "Serra Azul",
+  "Colinas", "Pôr do Sol",
+  "Águas Claras", "Pedra Branca",
+  "Bosque das Flores", "Lago Azul",
+  "Vila Nova", "São Francisco",
+  "Santa Rita", "Santa Maria",
+  "Jardim América", "Jardim Europa",
+  "Jardim das Palmeiras", "Jardim das Acácias",
+  "Jardim das Orquídeas", "Jardim dos Ipês",
+  "Jardim dos Estados", "Jardim Itália",
+  "Parque Industrial", "Parque Universitário",
+  "Parque Residencial", "Parque das Nações",
+  "Parque dos Eucaliptos",
+  "Residencial Atlântico", "Residencial Central",
+  "Residencial Imperial", "Residencial Monte Verde",
+  "Residencial Novo Tempo",
+  "Conjunto Habitacional", "Conjunto Esperança",
+  "Conjunto São Miguel", "Conjunto Primavera",
+  "Setor Central", "Setor Norte", "Setor Sul",
+  "Setor Leste", "Setor Oeste",
+  "Loteamento Novo Horizonte", "Loteamento Bela Vista",
+  "Morada da Serra", "Morada dos Pássaros",
+  "Morada das Flores", "Morada do Lago",
+  "Recanto das Árvores", "Recanto do Sol",
+  "Recanto Verde", "Recanto das Águas"];
+        
         let currentGender = localStorage.getItem('currentGender') || 'male';
         let currentData = JSON.parse(localStorage.getItem('currentData')) || null;
         let emails = JSON.parse(localStorage.getItem('emails')) || [];
         let approvedAccounts = JSON.parse(localStorage.getItem('approvedAccounts')) || [];
         let rejectedEmails = JSON.parse(localStorage.getItem('rejectedEmails')) || [];
-        let emailIndex = parseInt(localStorage.getItem('emailIndex')) || 0;
 
         function notify(msg, type = 'info') {
             const notif = document.getElementById('notification');
@@ -569,25 +698,49 @@
             return day + month + year;
         }
         
+        function generateStreet() {
+            const tipo = tiposVia[Math.floor(Math.random() * tiposVia.length)];
+            const usaTitulo = Math.random() > 0.5;
+            
+            if (usaTitulo) {
+                const titulo = titulos[Math.floor(Math.random() * titulos.length)];
+                const nome = nomesRua[Math.floor(Math.random() * nomesRua.length)];
+                const sobrenome = sobrenomesRua[Math.floor(Math.random() * sobrenomesRua.length)];
+                return `${tipo} ${titulo} ${nome} ${sobrenome}`;
+            } else {
+                const nome = nomesRua[Math.floor(Math.random() * nomesRua.length)];
+                const sobrenome = sobrenomesRua[Math.floor(Math.random() * sobrenomesRua.length)];
+                return `${tipo} ${nome} ${sobrenome}`;
+            }
+        }
+        
+        function generateNeighborhood() {
+            const tipo = tipoBairro[Math.floor(Math.random() * tipoBairro.length)];
+            const nome = nomeBairro[Math.floor(Math.random() * nomeBairro.length)];
+            const complemento = Math.random() > 0.7 ? ` ${Math.floor(Math.random() * 5) + 1}` : '';
+            return `${tipo} ${nome}${complemento}`;
+        }
+        
         function getNextEmail() {
-    if (emails.length === 0) {
-        return 'nenhum@email.com';
-    }
-    
-    // Pega o primeiro email da lista
-    const email = emails[0];
-    
-    // Remove o email usado
-    emails.shift();
-    
-    // Salva a lista atualizada
-    localStorage.setItem('emails', JSON.stringify(emails));
-    
-    // Atualiza a visualização
-    updateEmailList();
-    
-    return email;
-}
+            if (emails.length === 0) {
+                notify('⚠', 'warning');
+                return 'nenhum@email.com';
+            }
+            
+            // Pega o primeiro email da lista
+            const email = emails[0];
+            
+            // Remove o email usado
+            emails.shift();
+            
+            // Salva a lista atualizada
+            localStorage.setItem('emails', JSON.stringify(emails));
+            
+            // Atualiza a visualização
+            updateEmailList();
+            
+            return email;
+        }
         
         function generateData() {
             const firstNames = currentGender === 'male' ? maleNames : femaleNames;
@@ -598,7 +751,12 @@
                 fullName: `${firstName} ${lastName}`,
                 cpf: generateCPF(),
                 email: getNextEmail(),
-                birthdate: generateBirthdate()
+                birthdate: generateBirthdate(),
+                street: generateStreet(),
+                neighborhood: generateNeighborhood(),
+                city: 'Piracuruca',
+                state: 'PI',
+                cep: '64240000'
             };
             
             currentData = newData;
@@ -608,8 +766,13 @@
             document.getElementById('cpf').value = newData.cpf;
             document.getElementById('email').value = newData.email;
             document.getElementById('birthdate').value = newData.birthdate;
+            document.getElementById('street').value = newData.street;
+            document.getElementById('neighborhood').value = newData.neighborhood;
+            document.getElementById('city').value = newData.city;
+            document.getElementById('state').value = newData.state;
+            document.getElementById('cep').value = newData.cep;
             
-            notify('✓ Dados gerados!');
+            notify('✓');
         }
 
         function loadSavedData() {
@@ -618,6 +781,11 @@
                 document.getElementById('cpf').value = currentData.cpf;
                 document.getElementById('email').value = currentData.email;
                 document.getElementById('birthdate').value = currentData.birthdate;
+                document.getElementById('street').value = currentData.street || '';
+                document.getElementById('neighborhood').value = currentData.neighborhood || '';
+                document.getElementById('city').value = currentData.city || 'Piracuruca';
+                document.getElementById('state').value = currentData.state || 'PI';
+                document.getElementById('cep').value = currentData.cep || '64240000';
             }
         }
         
@@ -626,12 +794,12 @@
             const text = field.value;
             
             if (!text || text === '-') {
-                notify('Nenhum dado para copiar', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
             navigator.clipboard.writeText(text).then(() => {
-                notify('✓ Copiado!');
+                notify('✓');
             }).catch(() => {
                 const el = document.createElement('textarea');
                 el.value = text;
@@ -639,7 +807,7 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                notify('✓ Copiado!');
+                notify('✓');
             });
         }
 
@@ -668,9 +836,9 @@
                     if (addedCount > 0) {
                         localStorage.setItem('emails', JSON.stringify(emails));
                         updateEmailList();
-                        notify(`✓ ${addedCount} email(s) adicionado(s)!`);
+                        notify(`✓${addedCount}`);
                     } else {
-                        notify('Todos os emails já existem', 'warning');
+                        notify('⚠', 'warning');
                     }
                     
                     emailInput.value = '';
@@ -680,14 +848,14 @@
 
         function addEmail(email) {
             if (emails.includes(email)) {
-                notify('Email já adicionado!', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
             emails.push(email);
             localStorage.setItem('emails', JSON.stringify(emails));
             updateEmailList();
-            notify('✓ Email adicionado!');
+            notify('✓');
         }
 
         function updateEmailList() {
@@ -726,7 +894,7 @@
 
         function copyEmail(email) {
             navigator.clipboard.writeText(email).then(() => {
-                notify('✓ Email copiado!');
+                notify('✓');
             }).catch(() => {
                 const el = document.createElement('textarea');
                 el.value = email;
@@ -734,19 +902,19 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                notify('✓ Email copiado!');
+                notify('✓');
             });
         }
 
         function copyAllEmails() {
             if (emails.length === 0) {
-                notify('Nenhum email para copiar', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
             const text = emails.join('\n');
             navigator.clipboard.writeText(text).then(() => {
-                notify(`✓ ${emails.length} emails copiados!`);
+                notify(`✓${emails.length}`);
             }).catch(() => {
                 const el = document.createElement('textarea');
                 el.value = text;
@@ -754,13 +922,13 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                notify(`✓ ${emails.length} emails copiados!`);
+                notify(`✓${emails.length}`);
             });
         }
 
         function clearAllEmails() {
             if (emails.length === 0) {
-                notify('Nenhum email para limpar', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
@@ -770,13 +938,13 @@
             localStorage.setItem('emails', JSON.stringify(emails));
             localStorage.setItem('emailIndex', '0');
             updateEmailList();
-            notify(`✓ ${count} emails removidos`);
+            notify(`✓${count}`);
         }
 
         // ================= APPROVE/REJECT FUNCTIONS =================
         function approveAccount() {
             if (!currentData || !currentData.fullName) {
-                notify('Gere dados primeiro!', 'error');
+                notify('⚠', 'error');
                 return;
             }
 
@@ -785,6 +953,11 @@
                 cpf: currentData.cpf,
                 email: currentData.email,
                 birthdate: currentData.birthdate,
+                street: currentData.street,
+                neighborhood: currentData.neighborhood,
+                city: currentData.city,
+                state: currentData.state,
+                cep: currentData.cep,
                 timestamp: new Date().toLocaleTimeString('pt-BR', { 
                     hour: '2-digit', 
                     minute: '2-digit',
@@ -795,12 +968,12 @@
             approvedAccounts.unshift(account);
             localStorage.setItem('approvedAccounts', JSON.stringify(approvedAccounts));
             updateApprovedList();
-            notify('✅ Conta aprovada!');
+            notify('✅');
         }
 
         function rejectAccount() {
             if (!currentData || !currentData.email) {
-                notify('Gere dados primeiro!', 'error');
+                notify('⚠', 'error');
                 return;
             }
 
@@ -816,7 +989,7 @@
             rejectedEmails.unshift(rejectedEmail);
             localStorage.setItem('rejectedEmails', JSON.stringify(rejectedEmails));
             updateRejectedList();
-            notify('❌ Email marcado como problema');
+            notify('❌');
         }
 
         // ================= APPROVED LIST FUNCTIONS =================
@@ -858,7 +1031,7 @@
 
         function copyApprovedList() {
             if (approvedAccounts.length === 0) {
-                notify('Nenhuma conta para copiar', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
@@ -871,7 +1044,7 @@
             });
             
             navigator.clipboard.writeText(text).then(() => {
-                notify(`✓ ${approvedAccounts.length} contas copiadas!`);
+                notify(`✓${approvedAccounts.length}`);
             }).catch(() => {
                 const el = document.createElement('textarea');
                 el.value = text;
@@ -879,13 +1052,13 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                notify(`✓ ${approvedAccounts.length} contas copiadas!`);
+                notify(`✓${approvedAccounts.length}`);
             });
         }
 
         function clearApprovedList() {
             if (approvedAccounts.length === 0) {
-                notify('Nenhuma conta para limpar', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
@@ -893,7 +1066,7 @@
             approvedAccounts = [];
             localStorage.setItem('approvedAccounts', JSON.stringify(approvedAccounts));
             updateApprovedList();
-            notify(`✓ ${count} contas removidas`);
+            notify(`✓${count}`);
         }
 
         // ================= REJECTED LIST FUNCTIONS =================
@@ -934,7 +1107,7 @@
 
         function copyRejectedList() {
             if (rejectedEmails.length === 0) {
-                notify('Nenhum email para copiar', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
@@ -945,7 +1118,7 @@
             });
             
             navigator.clipboard.writeText(text).then(() => {
-                notify(`✓ ${rejectedEmails.length} emails copiados!`);
+                notify(`✓${rejectedEmails.length}`);
             }).catch(() => {
                 const el = document.createElement('textarea');
                 el.value = text;
@@ -953,13 +1126,13 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                notify(`✓ ${rejectedEmails.length} emails copiados!`);
+                notify(`✓${rejectedEmails.length}`);
             });
         }
 
         function clearRejectedList() {
             if (rejectedEmails.length === 0) {
-                notify('Nenhum email para limpar', 'warning');
+                notify('⚠', 'warning');
                 return;
             }
             
@@ -967,7 +1140,7 @@
             rejectedEmails = [];
             localStorage.setItem('rejectedEmails', JSON.stringify(rejectedEmails));
             updateRejectedList();
-            notify(`✓ ${count} emails removidos`);
+            notify(`✓${count}`);
         }
 
         // ================= INITIALIZATION =================
