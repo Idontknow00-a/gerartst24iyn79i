@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Dados</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: linear-gradient(135deg, #cbd5e1 0%, #475569 100%);
+            min-height: 100vh; 
+            padding: 10px; 
+        }
+        
+        .main-container {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .section {
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2); 
+            padding: 15px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn, .gender-btn {
+            flex: 1;
+            padding: 6px 2px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gender-btn {
+            font-size: 0.9rem;
+        }
+
+        .action-btn.generate { 
+            background: #64748b; 
+            color: white; 
+        }
+
+        .action-btn.generate:hover {
+            background: #475569;
+        }
+
+        .gender-btn.male { 
+            background: #e0f2fe; 
+            color: #0369a1; 
+        }
+
+        .gender-btn.male.active { 
+            background: #0369a1; 
+            color: white; 
+        }
+
+        .gender-btn.male:hover:not(.active) {
+            background: #bae6fd;
+        }
+
+        .gender-btn.female { 
+            background: #fce7f3; 
+            color: #db2777; 
+        }
+
+        .gender-btn.female.active { 
+            background: #db2777; 
+            color: white; 
+        }
+
+        .gender-btn.female:hover:not(.active) {
+            background: #fbcfe8;
+        }
+        
+        .data-field {
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        .data-field:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+        }
+
+        .data-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            font-size: 0.9rem;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .data-input:focus {
+            outline: none;
+            background: #ffffffaa;
+        }
+
+        /* Status Buttons */
+        .status-buttons {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .status-btn.approve {
+            background: #dcfce7;
+            border: 2px solid #86efac;
+        }
+
+        .status-btn.approve:hover {
+            background: #bbf7d0;
+            transform: scale(1.05);
+        }
+
+        .status-btn.reject {
+            background: #fee2e2;
+            border: 2px solid #fca5a5;
+        }
+
+        .status-btn.reject:hover {
+            background: #fecaca;
+            transform: scale(1.05);
+        }
+
+        /* Email Input Section */
+        .email-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        
+        .email-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            background: white;
+        }
+        
+        .email-input:focus {
+            outline: none;
+            border-color: #0ea5e9;
+        }
+        
+        .email-list {
+            max-height: 60px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .email-item {
+            padding: 6px 8px;
+            border-bottom: 1px solid #cbd5e1;
+            font-size: 0.8rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .email-item:hover {
+            background: #cbd5e1;
+        }
+        
+        .email-item:last-child {
+            border-bottom: none;
+        }
+        
+        .email-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .email-footer-btn {
+            background: #cbd5e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .email-footer-btn:hover {
+            background: #94a3b8;
+        }
+        
+        .email-count {
+            font-weight: 700;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Lists Section */
+        .lists-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .list-container {
+            margin-bottom: 15px;
+        }
+
+        .list-container:last-child {
+            margin-bottom: 0;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .list-title {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .list-content {
+            max-height: 80px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 8px;
+        }
+
+        .list-item {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.75rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .list-item:hover {
+            background: #f1f5f9;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item-name {
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 2px;
+        }
+
+        .list-item-details {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .list-footer {
+            display: flex;
+            gap: 6px;
+        }
+
+        .list-btn {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .list-btn.copy {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .list-btn.copy:hover {
+            background: #bfdbfe;
+        }
+
+        .list-btn.clear {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .list-btn.clear:hover {
+            background: #fecaca;
+        }
+        
+        .notification { 
+            position: fixed; 
+            top: 15px; 
+            right: 15px; 
+            background: #10b981;
+            color: white; 
+            padding: 8px 14px;
+            border-radius: 6px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            opacity: 0; 
+            transform: translateX(100%); 
+            transition: all 0.2s; 
+            font-size: 0.8rem;
+            max-width: 280px; 
+            z-index: 1000; 
+        }
+        
+        .notification.show { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+        
+        .notification.error { 
+            background: #ef4444; 
+        }
+        
+        .notification.warning { 
+            background: #f59e0b; 
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Data Generator Section -->  
+        <div class="section">  
+            <div class="action-buttons">  
+                <button class="gender-btn male active" onclick="setGender('male')" id="maleBtn">MAS</button>  
+                <button class="gender-btn female" onclick="setGender('female')" id="femaleBtn">FEM</button>  
+                <button class="action-btn generate" onclick="generateData()">GERAR</button>  
+            </div>
+            
+            <div class="data-field" onclick="copyDataField('fullName')">
+                <input type="text" class="data-input" id="fullName" readonly placeholder="Nome Completo">
+            </div>
+            
+            <div class="data-field" onclick="copyDataField('email')">
+                <input type="text" class="data-input" id="email" readonly placeholder="Email">
+            </div>
+            
+            <div class="data-field" onclick="copyDataField('cpf')">
+                <input type="text" class="data-input" id="cpf" readonly placeholder="CPF">
+            </div>
+            
+            <div class="data-field" onclick="copyDataField('birthdate')">
+                <input type="text" class="data-input" id="birthdate" readonly placeholder="Data Nascimento">
+            </div>
+
+            <!-- Notes Field -->
+            <div class="data-field" style="cursor: text;">
+                <input type="text" class="data-input" id="notes" placeholder="Notas..." style="cursor: text;">
+            </div>
+
+            <!-- Status Buttons -->
+            <div class="status-buttons">
+                <button class="status-btn reject" onclick="rejectAccount()" title="Marcar email como problemático">
+                    ❌
+                </button>
+                <button class="status-btn approve" onclick="approveAccount()" title="Salvar conta completa">
+                    ✅
+                </button>
+            </div>
+            
+            <!-- Email Input Section -->
+            <div class="email-section">
+                <input type="text" class="email-input" id="emailInput" 
+                       placeholder="Cole emails aqui (auto-salva)"
+                       oninput="handleEmailInput(event)">
+                <div class="email-list" id="emailList">
+                    <!-- Email items will appear here -->
+                </div>
+                
+                <div class="email-footer">
+                    <button class="email-footer-btn" onclick="clearAllEmails()" title="Limpar todos os emails">🗑️</button>
+                    <div class="email-count" id="emailCount">0</div>
+                    <button class="email-footer-btn" onclick="copyAllEmails()" title="Copiar todos os emails">📋</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lists Section -->
+        <div class="section lists-section">
+            <!-- Approved Accounts List -->
+            <div class="list-container">
+                <div class="list-header">
+                    <div class="list-title">✅ Contas Aprovadas (<span id="approvedCount">0</span>)</div>
+                </div>
+                <div class="list-content" id="approvedList">
+                    <div class="list-item" style="text-align: center; font-style: italic;">Nenhuma conta aprovada</div>
+                </div>
+                <div class="list-footer">
+                    <button class="list-btn copy" onclick="copyApprovedList()">📋 Copiar</button>
+                    <button class="list-btn clear" onclick="clearApprovedList()">🗑️ Limpar</button>
+                </div>
+            </div>
+
+            <!-- Rejected Emails List -->
+            <div class="list-container">
+                <div class="list-header">
+                    <div class="list-title">❌ Emails com Problema (<span id="rejectedCount">0</span>)</div>
+                </div>
+                <div class="list-content" id="rejectedList">
+                    <div class="list-item" style="text-align: center; font-style: italic;">Nenhum email rejeitado</div>
+                </div>
+                <div class="list-footer">
+                    <button class="list-btn copy" onclick="copyRejectedList()">📋 Copiar</button>
+                    <button class="list-btn clear" onclick="clearRejectedList()">🗑️ Limpar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // ================= DATA GENERATOR FUNCTIONS =================
+        const maleNames = ["Abelardo", "Adriano", "Agnaldo", "Alan", "Alberto", "Aldo", "Alex", "Alexandre", "Alfredo", "Alvaro",
+            "Anderson", "Andre", "Antonio", "Ariel", "Augusto", "Aureliano", "Bruno", "Caio", "Cassio",
+            "Cesar", "Cristiano", "Daniel", "Davi", "Diego", "Douglas", "Eduardo", "Elias", "Emilio", "Enzo",
+            "Felipe", "Fernando", "Francisco", "Gabriel", "Gustavo", "Henrique", "Hugo", "Igor", "Ivo", "Jackson",
+            "Jair", "James", "Jander", "Joao", "Jorge", "Jose", "Juan", "Julio", "Junior", "Kaio", "Leonardo",
+            "Leandro", "Luis", "Luciano", "Lucas", "Marcelo", "Marcos", "Mario", "Martin", "Matheus", "Mauricio",
+            "Miguel", "Moises", "Nicolas", "Nilton", "Nivaldo", "Otavio", "Paulo", "Pedro", "Rafael", "Renato", "Ricardo",
+            "Roberto", "Rogerio", "Romulo", "Ronaldo", "Rodrigo", "Samuel", "Sergio", "Silvio", "Thales", "Tiago",
+            "Tobias", "Tomas", "Vagner", "Vitor", "Vinicius", "Wagner", "Wallace", "Washington", "Willian", "Wilson",
+            "Walter", "Ademir", "Adolfo", "Agostinho", "Ailton", "Alcides", "Alfredo", "Altair", "Amadeu", "Americo",
+            "Anselmo", "Antonino", "Arnaldo", "Artur", "Aurelio", "Bento", "Benjamim", "Benicio", "Bernard",
+            "Brendon", "Caetano", "Carlos", "Carmelo", "Cassio", "Celso", "Claudinei", "Claudemir", "Claudio",
+            "Cleo", "Cristiano", "Damiao", "Danilo", "Dario", "Edgard", "Edilson", "Edson", "Efraim", "Eike",
+            "Eliseu", "Emiliano", "Enrico", "Epitacio", "Erico", "Eugenio", "Evaldo", "Evandro", "Everaldo", "Fabiano",
+            "Fabricio", "Fabio", "Feliciano", "Filomeno", "Flavio", "Florencio", "Frederico", "Geraldo", "Gideon",
+            "Gilberto", "Giordano", "Giovani", "Gregorio", "Heitor", "Icaro", "Ilson", "Ismael", "Israel", "Italo",
+            "Jaime", "Joaquim", "Jose Maria", "Josuel", "Joviano", "Luan", "Luiz Felipe", "Marcio", "Marco", "Nelio",
+            "Nestor", "Nilson", "Norberto", "Nuno", "Osmar", "Paulo", "Plinio", "Rubens", "Ruy", "Salomao",
+            "Samir", "Sandro", "Severino", "Sidnei", "Silvano", "Silvio", "Tadeu", "Tarcisio", "Teodoro", "Thiago", "Tomas",
+            "Ulysses", "Urbano", "Valdir", "Valter", "Vicente", "Vladmir", "Waldemar", "Wilmar", "Wladimir"];
+        const femaleNames = ["Abigail", "Adelaide", "Adelia", "Adriana", "Agatha", "Agnes", "Aida", "Aileen", "Aira", "Alana", "Alice", "Aline", "Alzira", "Amalia", "Amanda", "Amelia", "Ana", "Analia", "Andrea", "Andressa", "Angela", "Angelica", "Anita", "Antonia", "Aparecida", "Ariana", "Ariane", "Arlete", "Arya", "Aurora", "Barbara", "Beatriz", "Benedita", "Berenice", "Bernadete", "Bianca", "Bruna", "Brunilda", "Caetana", "Camila", "Carina", "Carla", "Carmem", "Carmo", "Carolina", "Cassia", "Catarina", "Cecilia", "Celina", "Celia", "Clara", "Clarice", "Clarinda", "Claudia", "Clementina", "Cleonice", "Clotilde", "Conceicao", "Constancia", "Cristina", "Dafne", "Dalva", "Daniela", "Daphne", "Dara", "Debora", "Deise", "Denise", "Diana", "Dilma", "Diolinda", "Diva", "Dora", "Doroteia", "Eduarda", "Elaine", "Eliana", "Elisabete", "Elisabeth", "Elisa", "Elisete", "Elizangela", "Elsa", "Elza", "Emanuela", "Emilia", "Emily", "Eneida", "Ercilia", "Erica", "Ermelinda", "Ester", "Esther", "Eunice", "Eva", "Evelyn", "Fabiana", "Fabiola", "Fatima", "Felicia", "Fernanda", "Filomena", "Flavia", "Francisca", "Gabriela", "Gabrielle", "Geralda", "Gertrudes", "Giovanna", "Giselle", "Gloria", "Graca", "Graciela", "Graziella", "Guadalupe", "Helena", "Heloisa", "Henriqueta", "Hilda", "Idalina", "Idalia", "Idalina", "Ieda", "Ileana", "Ilma", "Ilona", "Ines", "Iolanda", "Ione", "Irene", "Iris", "Isabel", "Isabela", "Isis", "Ivana", "Ivone", "Jacinta", "Janaina", "Janete", "Janice", "Jasmin", "Jeane", "Jocasta", "Joceline", "Joana", "Jordana", "Josefa", "Josefina", "Jovita", "Judite", "Julia", "Juliana", "Julieta", "Jurema", "Justina", "Karla", "Karoline", "Katharina", "Katia", "Katrina", "Kelly", "Kim", "Lais", "Lara", "Laura", "Laurinda", "Leandra", "Leila", "Lena", "Leonor", "Leticia", "Lia", "Liana", "Lilian", "Liliana", "Linda", "Lineia", "Livia", "Loren", "Lorena", "Luana", "Lucia", "Luciana", "Luciene", "Lucrecia", "Ludmila", "Luisa", "Luzia", "Madalena", "Magda", "Magnolia", "Maia", "Maira", "Manuela", "Mara", "Marcela", "Marcia", "Marcilia", "Margarida", "Maria", "Mariana", "Marilda", "Marina", "Marisa", "Marlene", "Marta", "Matilde", "Maura", "Mavi", "Maxima", "Mayara", "Maysa", "Melania", "Melinda", "Melissa", "Mercedes", "Milena", "Miriam", "Mirian", "Mirela", "Miriam", "Monica", "Nadia", "Nair", "Nancy", "Nara", "Natividade", "Natalia", "Natasha", "Nazare", "Nela", "Nelia", "Nely", "Nereida", "Neyde", "Neuza", "Nidia", "Nila", "Nilza", "Nina", "Ninfa", "Nisia", "Noemia", "Noemi", "Norma", "Nubia", "Odalicia", "Odete", "Ofelia", "Olga", "Olimpia", "Otilia", "Palmira", "Patricia", "Paula", "Paulina", "Pauline", "Penelope", "Perpetua", "Piedade", "Pilar", "Priscila", "Querina", "Quintina", "Rafaela", "Raquel", "Rebeca", "Regina", "Renata", "Rita", "Roberta", "Rosa", "Rosalina", "Rosana", "Rosangela", "Rosario", "Rosilene", "Rosimeire", "Rubia", "Rute", "Sabrina", "Samanta", "Sandra", "Sara", "Sasha", "Selena", "Selma", "Severina", "Sheila", "Sibila", "Sibila", "Silvana", "Silvia", "Simone", "Sofia", "Solange", "Sonia", "Soraya", "Suellen", "Sulamita", "Suzana", "Tania", "Tassia", "Tatiana", "Telma", "Teresa", "Tereza", "Thereza", "Tiana", "Tina", "Tirza", "Tomasia", "Valeria", "Valesca", "Valquiria", "Vanessa", "Vanda", "Verena", "Veridiana", "Veronica", "Victoria", "Vilma", "Violeta", "Virginia", "Vitoria", "Vivian", "Viviane", "Wanda", "Xenia", "Yara", "Yasmin", "Yeda", "Yolanda", "Yone", "Yvone", "Zaira", "Zelia", "Zenaide", "Zenilda", "Zilda"];
+        const lastNames = ["Abreu", "Albuquerque", "Almeida", "Andrade", "Araujo", "Barbosa", "Barros", "Borges", "Brandao", "Brazil",
+            "Campos", "Carvalho", "Castro", "Chaves", "Clemente", "Costa", "Cruz", "Dias", "Duarte", "Faria",
+            "Fernandes", "Ferreira", "Freitas", "Gama", "Garcia", "Goncalves", "Gomes", "Goncalves", "Guimaraes",
+            "Henrique", "Lima", "Lopes", "Lourenco", "Macedo", "Machado", "Martins", "Melo", "Mesquita", "Miranda",
+            "Moraes", "Moreira", "Mota", "Neto", "Oliveira", "Pereira", "Pinto", "Rezende", "Ribeiro", "Rodrigues",
+            "Romero", "Rosa", "Santos", "Silva", "Silveira", "Siqueira", "Souza", "Teixeira", "Torres", "Valente",
+            "Vargas", "Vieira", "Vila", "Vieira", "Araujo", "Alves", "Bezerra", "Campos", "Cardoso", "Castro",
+            "Cruz", "Dantas", "Falcao", "Ferreira", "Freitas", "Goncalves", "Gomes", "Guimaraes", "Lima", "Lopes",
+            "Melo", "Mendes", "Moraes", "Moreira", "Mota", "Oliveira", "Pacheco", "Pereira", "Pinto", "Reis",
+            "Ribeiro", "Rodrigues", "Santos", "Silva", "Silveira", "Siqueira", "Souza", "Teixeira", "Torres", "Valente",
+            "Vargas", "Vieira", "Vila", "Viana", "Antunes", "Araujo", "Albuquerque", "Almeida", "Barbosa", "Barros",
+            "Brandao", "Brazil", "Campos", "Carvalho", "Castro", "Chaves", "Clemente", "Costa", "Cruz", "Dias",
+            "Duarte", "Faria", "Fernandes", "Ferreira", "Freitas", "Gama", "Garcia", "Goncalves", "Gomes", "Guimaraes",
+            "Henrique", "Lima", "Lopes", "Lourenco", "Macedo", "Machado", "Martins", "Melo", "Mesquita", "Miranda",
+            "Moraes", "Moreira", "Mota", "Neto", "Oliveira", "Pereira", "Pinto", "Rezende", "Ribeiro", "Rodrigues",
+            "Romero", "Rosa", "Santos", "Silva", "Silveira", "Siqueira", "Souza", "Teixeira", "Torres", "Valente",
+            "Vargas", "Vieira", "Vila", "Vieira", "Araujo", "Alves", "Bezerra", "Campos", "Cardoso", "Castro",
+            "Cruz", "Dantas", "Falcao", "Ferreira", "Freitas", "Goncalves", "Gomes", "Guimaraes", "Lima", "Lopes",
+            "Melo", "Mendes", "Moraes", "Moreira", "Mota", "Oliveira", "Pacheco", "Pereira", "Pinto", "Reis",
+            "Ribeiro", "Rodrigues", "Santos", "Silva", "Silveira", "Siqueira", "Souza", "Teixeira", "Torres", "Valente",
+            "Vargas", "Vieira", "Vila", "Viana", "Antunes", "Barros", "Carvalho", "Castro", "Cavalcante", "Chaves",
+            "Costa", "Cruz", "Dias", "Duarte", "Ferreira", "Freitas", "Gomes", "Goncalves", "Guimaraes", "Lima",
+            "Lopes", "Machado", "Mendes", "Melo", "Moraes", "Moreira", "Neto", "Oliveira", "Pereira", "Pinto",
+            "Reis", "Ribeiro", "Rodrigues", "Silva", "Silveira", "Siqueira", "Souza", "Teixeira", "Torres", "Valente"];
+        
+        let currentGender = localStorage.getItem('currentGender') || 'male';
+        let currentData = JSON.parse(localStorage.getItem('currentData')) || null;
+        let emails = JSON.parse(localStorage.getItem('emails')) || [];
+        let approvedAccounts = JSON.parse(localStorage.getItem('approvedAccounts')) || [];
+        let rejectedEmails = JSON.parse(localStorage.getItem('rejectedEmails')) || [];
+        let emailIndex = parseInt(localStorage.getItem('emailIndex')) || 0;
+
+        function notify(msg, type = 'info') {
+            const notif = document.getElementById('notification');
+            notif.textContent = msg;
+            notif.className = `notification ${type} show`;
+            setTimeout(() => notif.classList.remove('show'), 1800);
+        }
+
+        function setGender(gender) {
+            currentGender = gender;
+            localStorage.setItem('currentGender', gender);
+            document.getElementById('maleBtn').classList.toggle('active', gender === 'male');
+            document.getElementById('femaleBtn').classList.toggle('active', gender === 'female');
+        }
+        
+        function generateCPF() {
+            let cpf = '';
+            for (let i = 0; i < 9; i++) cpf += Math.floor(Math.random() * 10);
+            
+            let sum = 0;
+            for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
+            let digit1 = 11 - (sum % 11);
+            if (digit1 > 9) digit1 = 0;
+            cpf += digit1;
+            
+            sum = 0;
+            for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
+            let digit2 = 11 - (sum % 11);
+            if (digit2 > 9) digit2 = 0;
+            cpf += digit2;
+            
+            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1$2$3$4');
+        }
+        
+        function generateBirthdate() {
+            const date = new Date(1950 + Math.floor(Math.random() * 53), Math.floor(Math.random() * 12), 1 + Math.floor(Math.random() * 28));
+            const day = ('0' + date.getDate()).slice(-2);
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const year = date.getFullYear();
+            return day + month + year;
+        }
+        
+        function getNextEmail() {
+    if (emails.length === 0) {
+        return 'nenhum@email.com';
+    }
+    
+    // Pega o primeiro email da lista
+    const email = emails[0];
+    
+    // Remove o email usado
+    emails.shift();
+    
+    // Salva a lista atualizada
+    localStorage.setItem('emails', JSON.stringify(emails));
+    
+    // Atualiza a visualização
+    updateEmailList();
+    
+    return email;
+}
+        
+        function generateData() {
+            const firstNames = currentGender === 'male' ? maleNames : femaleNames;
+            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            
+            const newData = {
+                fullName: `${firstName} ${lastName}`,
+                cpf: generateCPF(),
+                email: getNextEmail(),
+                birthdate: generateBirthdate()
+            };
+            
+            currentData = newData;
+            localStorage.setItem('currentData', JSON.stringify(newData));
+            
+            document.getElementById('fullName').value = newData.fullName;
+            document.getElementById('cpf').value = newData.cpf;
+            document.getElementById('email').value = newData.email;
+            document.getElementById('birthdate').value = newData.birthdate;
+            
+            notify('✓ Dados gerados!');
+        }
+
+        function loadSavedData() {
+            if (currentData) {
+                document.getElementById('fullName').value = currentData.fullName;
+                document.getElementById('cpf').value = currentData.cpf;
+                document.getElementById('email').value = currentData.email;
+                document.getElementById('birthdate').value = currentData.birthdate;
+            }
+        }
+        
+        function copyDataField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const text = field.value;
+            
+            if (!text || text === '-') {
+                notify('Nenhum dado para copiar', 'warning');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                notify('✓ Copiado!');
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                notify('✓ Copiado!');
+            });
+        }
+
+        // ================= EMAIL MANAGEMENT =================
+        function handleEmailInput(event) {
+            const emailInput = document.getElementById('emailInput');
+            const emailText = emailInput.value.trim();
+            
+            if (emailText.length < 3) return;
+            
+            clearTimeout(emailInput.timer);
+            emailInput.timer = setTimeout(() => {
+                // Separa emails por espaço ou quebra de linha
+                const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+                const foundEmails = emailText.match(emailPattern);
+                
+                if (foundEmails && foundEmails.length > 0) {
+                    let addedCount = 0;
+                    foundEmails.forEach(email => {
+                        if (!emails.includes(email)) {
+                            emails.push(email);
+                            addedCount++;
+                        }
+                    });
+                    
+                    if (addedCount > 0) {
+                        localStorage.setItem('emails', JSON.stringify(emails));
+                        updateEmailList();
+                        notify(`✓ ${addedCount} email(s) adicionado(s)!`);
+                    } else {
+                        notify('Todos os emails já existem', 'warning');
+                    }
+                    
+                    emailInput.value = '';
+                }
+            }, 800);
+        }
+
+        function addEmail(email) {
+            if (emails.includes(email)) {
+                notify('Email já adicionado!', 'warning');
+                return;
+            }
+            
+            emails.push(email);
+            localStorage.setItem('emails', JSON.stringify(emails));
+            updateEmailList();
+            notify('✓ Email adicionado!');
+        }
+
+        function updateEmailList() {
+            const emailList = document.getElementById('emailList');
+            const emailCount = document.getElementById('emailCount');
+            
+            emailCount.textContent = emails.length;
+            
+            if (emails.length === 0) {
+                emailList.innerHTML = '<div class="email-item" style="text-align: center; font-style: italic;">Nenhum email adicionado</div>';
+                return;
+            }
+            
+            emailList.innerHTML = '';
+            const recentEmails = emails.slice(-3).reverse();
+            
+            recentEmails.forEach(email => {
+                const item = document.createElement('div');
+                item.className = 'email-item';
+                item.textContent = email;
+                item.onclick = () => copyEmail(email);
+                item.title = 'Clique para copiar';
+                emailList.appendChild(item);
+            });
+            
+            if (emails.length > 3) {
+                const moreItem = document.createElement('div');
+                moreItem.className = 'email-item';
+                moreItem.style.textAlign = 'center';
+                moreItem.style.fontStyle = 'italic';
+                moreItem.style.fontSize = '0.7rem';
+                moreItem.textContent = `... e mais ${emails.length - 3} emails`;
+                emailList.appendChild(moreItem);
+            }
+        }
+
+        function copyEmail(email) {
+            navigator.clipboard.writeText(email).then(() => {
+                notify('✓ Email copiado!');
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = email;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                notify('✓ Email copiado!');
+            });
+        }
+
+        function copyAllEmails() {
+            if (emails.length === 0) {
+                notify('Nenhum email para copiar', 'warning');
+                return;
+            }
+            
+            const text = emails.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                notify(`✓ ${emails.length} emails copiados!`);
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                notify(`✓ ${emails.length} emails copiados!`);
+            });
+        }
+
+        function clearAllEmails() {
+            if (emails.length === 0) {
+                notify('Nenhum email para limpar', 'warning');
+                return;
+            }
+            
+            const count = emails.length;
+            emails = [];
+            emailIndex = 0;
+            localStorage.setItem('emails', JSON.stringify(emails));
+            localStorage.setItem('emailIndex', '0');
+            updateEmailList();
+            notify(`✓ ${count} emails removidos`);
+        }
+
+        // ================= APPROVE/REJECT FUNCTIONS =================
+        function approveAccount() {
+            if (!currentData || !currentData.fullName) {
+                notify('Gere dados primeiro!', 'error');
+                return;
+            }
+
+            const account = {
+                fullName: currentData.fullName,
+                cpf: currentData.cpf,
+                email: currentData.email,
+                birthdate: currentData.birthdate,
+                timestamp: new Date().toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                })
+            };
+
+            approvedAccounts.unshift(account);
+            localStorage.setItem('approvedAccounts', JSON.stringify(approvedAccounts));
+            updateApprovedList();
+            notify('✅ Conta aprovada!');
+        }
+
+        function rejectAccount() {
+            if (!currentData || !currentData.email) {
+                notify('Gere dados primeiro!', 'error');
+                return;
+            }
+
+            const rejectedEmail = {
+                email: currentData.email,
+                timestamp: new Date().toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                })
+            };
+
+            rejectedEmails.unshift(rejectedEmail);
+            localStorage.setItem('rejectedEmails', JSON.stringify(rejectedEmails));
+            updateRejectedList();
+            notify('❌ Email marcado como problema');
+        }
+
+        // ================= APPROVED LIST FUNCTIONS =================
+        function updateApprovedList() {
+            const approvedList = document.getElementById('approvedList');
+            const approvedCount = document.getElementById('approvedCount');
+            
+            approvedCount.textContent = approvedAccounts.length;
+            
+            if (approvedAccounts.length === 0) {
+                approvedList.innerHTML = '<div class="list-item" style="text-align: center; font-style: italic;">Nenhuma conta aprovada</div>';
+                return;
+            }
+            
+            approvedList.innerHTML = '';
+            const recentAccounts = approvedAccounts.slice(0, 3);
+            
+            recentAccounts.forEach(account => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <div class="list-item-name">${account.fullName}</div>
+                    <div class="list-item-details">${account.email} • ${account.cpf}</div>
+                `;
+                item.title = `${account.fullName}\n${account.email}\n${account.cpf}\n${account.birthdate}\n${account.timestamp}`;
+                approvedList.appendChild(item);
+            });
+            
+            if (approvedAccounts.length > 3) {
+                const moreItem = document.createElement('div');
+                moreItem.className = 'list-item';
+                moreItem.style.textAlign = 'center';
+                moreItem.style.fontStyle = 'italic';
+                moreItem.style.fontSize = '0.7rem';
+                moreItem.textContent = `... e mais ${approvedAccounts.length - 3} contas`;
+                approvedList.appendChild(moreItem);
+            }
+        }
+
+        function copyApprovedList() {
+            if (approvedAccounts.length === 0) {
+                notify('Nenhuma conta para copiar', 'warning');
+                return;
+            }
+            
+            let text = '\n\n';
+            approvedAccounts.forEach((account, index) => {
+                text += `${account.fullName}\n`;
+                text += `${account.email}\n`;
+                text += `${account.cpf}\n`;
+                if (index < approvedAccounts.length - 1) text += '\n';
+            });
+            
+            navigator.clipboard.writeText(text).then(() => {
+                notify(`✓ ${approvedAccounts.length} contas copiadas!`);
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                notify(`✓ ${approvedAccounts.length} contas copiadas!`);
+            });
+        }
+
+        function clearApprovedList() {
+            if (approvedAccounts.length === 0) {
+                notify('Nenhuma conta para limpar', 'warning');
+                return;
+            }
+            
+            const count = approvedAccounts.length;
+            approvedAccounts = [];
+            localStorage.setItem('approvedAccounts', JSON.stringify(approvedAccounts));
+            updateApprovedList();
+            notify(`✓ ${count} contas removidas`);
+        }
+
+        // ================= REJECTED LIST FUNCTIONS =================
+        function updateRejectedList() {
+            const rejectedList = document.getElementById('rejectedList');
+            const rejectedCount = document.getElementById('rejectedCount');
+            
+            rejectedCount.textContent = rejectedEmails.length;
+            
+            if (rejectedEmails.length === 0) {
+                rejectedList.innerHTML = '<div class="list-item" style="text-align: center; font-style: italic;">Nenhum email rejeitado</div>';
+                return;
+            }
+            
+            rejectedList.innerHTML = '';
+            const recentRejected = rejectedEmails.slice(0, 5);
+            
+            recentRejected.forEach(rejected => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <div class="list-item-name">${rejected.email}</div>
+                    <div class="list-item-details">${rejected.timestamp}</div>
+                `;
+                rejectedList.appendChild(item);
+            });
+            
+            if (rejectedEmails.length > 5) {
+                const moreItem = document.createElement('div');
+                moreItem.className = 'list-item';
+                moreItem.style.textAlign = 'center';
+                moreItem.style.fontStyle = 'italic';
+                moreItem.style.fontSize = '0.7rem';
+                moreItem.textContent = `... e mais ${rejectedEmails.length - 5} emails`;
+                rejectedList.appendChild(moreItem);
+            }
+        }
+
+        function copyRejectedList() {
+            if (rejectedEmails.length === 0) {
+                notify('Nenhum email para copiar', 'warning');
+                return;
+            }
+            
+            let text = '';
+            rejectedEmails.forEach((rejected, index) => {
+                text += `${rejected.email}`;
+                if (index < rejectedEmails.length - 1) text += '\n';
+            });
+            
+            navigator.clipboard.writeText(text).then(() => {
+                notify(`✓ ${rejectedEmails.length} emails copiados!`);
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                notify(`✓ ${rejectedEmails.length} emails copiados!`);
+            });
+        }
+
+        function clearRejectedList() {
+            if (rejectedEmails.length === 0) {
+                notify('Nenhum email para limpar', 'warning');
+                return;
+            }
+            
+            const count = rejectedEmails.length;
+            rejectedEmails = [];
+            localStorage.setItem('rejectedEmails', JSON.stringify(rejectedEmails));
+            updateRejectedList();
+            notify(`✓ ${count} emails removidos`);
+        }
+
+        // ================= INITIALIZATION =================
+        function init() {
+            setGender(currentGender);
+            loadSavedData();
+            updateEmailList();
+            updateApprovedList();
+            updateRejectedList();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
