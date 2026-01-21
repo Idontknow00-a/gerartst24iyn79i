@@ -415,8 +415,8 @@
                     <input type="text" class="data-input" id="cpf" readonly placeholder="CPF">
                 </div>
                 
-                <div class="data-field" onclick="copyDataField('birthdate')">
-                    <input type="text" class="data-input" id="birthdate" readonly placeholder="Data Nascimento">
+                <div class="data-field" onclick="copyDataField('phone')">
+                    <input type="text" class="data-input" id="phone" readonly placeholder="Data Nascimento">
                 </div>
             </div>
 
@@ -690,12 +690,17 @@
             return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1$2$3$4');
         }
         
-        function generateBirthdate() {
-            const date = new Date(1950 + Math.floor(Math.random() * 53), Math.floor(Math.random() * 12), 1 + Math.floor(Math.random() * 28));
-            const day = ('0' + date.getDate()).slice(-2);
-            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-            const year = date.getFullYear();
-            return day + month + year;
+        function generatePhone() {
+            // DDD (11-99)
+            const ddd = Math.floor(Math.random() * 89) + 11;
+            // Primeiro dígito 9 (celular)
+            const firstDigit = 9;
+            // Próximos 4 dígitos
+            const middle = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            // Últimos 4 dígitos
+            const last = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            
+            return `${ddd}9${middle}${last}`;
         }
         
         function generateStreet() {
@@ -751,7 +756,7 @@
                 fullName: `${firstName} ${lastName}`,
                 cpf: generateCPF(),
                 email: getNextEmail(),
-                birthdate: generateBirthdate(),
+                phone: generatePhone(),
                 street: generateStreet(),
                 neighborhood: generateNeighborhood(),
                 city: 'Piracuruca',
@@ -765,7 +770,7 @@
             document.getElementById('fullName').value = newData.fullName;
             document.getElementById('cpf').value = newData.cpf;
             document.getElementById('email').value = newData.email;
-            document.getElementById('birthdate').value = newData.birthdate;
+            document.getElementById('phone').value = newData.phone;
             document.getElementById('street').value = newData.street;
             document.getElementById('neighborhood').value = newData.neighborhood;
             document.getElementById('city').value = newData.city;
@@ -780,7 +785,7 @@
                 document.getElementById('fullName').value = currentData.fullName;
                 document.getElementById('cpf').value = currentData.cpf;
                 document.getElementById('email').value = currentData.email;
-                document.getElementById('birthdate').value = currentData.birthdate;
+                document.getElementById('phone').value = currentData.phone;
                 document.getElementById('street').value = currentData.street || '';
                 document.getElementById('neighborhood').value = currentData.neighborhood || '';
                 document.getElementById('city').value = currentData.city || 'Piracuruca';
@@ -952,7 +957,7 @@
                 fullName: currentData.fullName,
                 cpf: currentData.cpf,
                 email: currentData.email,
-                birthdate: currentData.birthdate,
+                phone: currentData.phone,
                 street: currentData.street,
                 neighborhood: currentData.neighborhood,
                 city: currentData.city,
