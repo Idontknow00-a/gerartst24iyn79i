@@ -401,12 +401,18 @@
             </div>
             
             <div class="data-row">
-                <div class="data-field" onclick="copyDataField('email')">
+                <div class="data-field full-width" onclick="copyDataField('email')">
                     <input type="text" class="data-input" id="email" readonly placeholder="Email">
                 </div>
-                
+            </div>
+            
+            <div class="data-row">
                 <div class="data-field" onclick="copyDataField('fullName')">
                     <input type="text" class="data-input" id="fullName" readonly placeholder="Nome Completo">
+                </div>
+                
+                <div class="data-field" onclick="copyDataField('fullNameLower')">
+                    <input type="text" class="data-input" id="fullNameLower" readonly placeholder="nomecompletominusculo">
                 </div>
             </div>
             
@@ -752,8 +758,10 @@
             const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
             const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
             
+            const fullName = `${firstName} ${lastName}`;
             const newData = {
-                fullName: `${firstName} ${lastName}`,
+                fullName: fullName,
+                fullNameLower: fullName.replace(/\s+/g, '').toLowerCase(),
                 cpf: generateCPF(),
                 email: getNextEmail(),
                 phone: generatePhone(),
@@ -768,6 +776,7 @@
             localStorage.setItem('currentData', JSON.stringify(newData));
             
             document.getElementById('fullName').value = newData.fullName;
+            document.getElementById('fullNameLower').value = newData.fullNameLower;
             document.getElementById('cpf').value = newData.cpf;
             document.getElementById('email').value = newData.email;
             document.getElementById('phone').value = newData.phone;
@@ -783,6 +792,7 @@
         function loadSavedData() {
             if (currentData) {
                 document.getElementById('fullName').value = currentData.fullName;
+                document.getElementById('fullNameLower').value = currentData.fullNameLower || currentData.fullName.replace(/\s+/g, '').toLowerCase();
                 document.getElementById('cpf').value = currentData.cpf;
                 document.getElementById('email').value = currentData.email;
                 document.getElementById('phone').value = currentData.phone;
@@ -939,9 +949,7 @@
             
             const count = emails.length;
             emails = [];
-            emailIndex = 0;
             localStorage.setItem('emails', JSON.stringify(emails));
-            localStorage.setItem('emailIndex', '0');
             updateEmailList();
             notify(`✓${count}`);
         }
@@ -955,6 +963,7 @@
 
             const account = {
                 fullName: currentData.fullName,
+                fullNameLower: currentData.fullNameLower,
                 cpf: currentData.cpf,
                 email: currentData.email,
                 phone: currentData.phone,
@@ -1019,7 +1028,7 @@
                     <div class="list-item-name">${account.fullName}</div>
                     <div class="list-item-details">${account.email} • ${account.cpf}</div>
                 `;
-                item.title = `${account.fullName}\n${account.email}\n${account.cpf}\n${account.birthdate}\n${account.timestamp}`;
+                item.title = `${account.fullName}\n${account.email}\n${account.cpf}\n${account.timestamp}`;
                 approvedList.appendChild(item);
             });
             
